@@ -1,6 +1,7 @@
 import json
 
 import numpy as np
+import pytest
 from PIL import Image
 
 from pointglyph.cli import main
@@ -30,6 +31,7 @@ def test_export_preview_png_creates_image(tmp_path):
 
 
 def test_cli_creates_required_files(tmp_path, font_path):
+    points = 25
     output_dir = tmp_path / "export"
 
     exit_code = main(
@@ -38,7 +40,7 @@ def test_cli_creates_required_files(tmp_path, font_path):
             "--font",
             str(font_path),
             "--points",
-            "25",
+            str(points),
             "--output",
             str(output_dir),
             "--seed",
@@ -51,10 +53,47 @@ def test_cli_creates_required_files(tmp_path, font_path):
     assert (output_dir / "particles.json").exists()
     assert (output_dir / "preview.png").exists()
     particles = json.loads((output_dir / "particles.json").read_text())
-    assert len(particles["attributes"]["textPositions"]) == 25 * 3
+    assert len(particles["attributes"]["startPositions"]) == points * 3
+    assert len(particles["attributes"]["textPositions"]) == points * 3
+    assert len(particles["attributes"]["endPositions"]) == points * 3
+
+
+def test_cli_same_seed_creates_identical_particles(tmp_path, font_path):
+    first_dir = tmp_path / "first"
+    second_dir = tmp_path / "second"
+    shared_args = [
+        "TEST",
+        "--font",
+        str(font_path),
+        "--points",
+        "25",
+        "--seed",
+        "42",
+    ]
+
+    assert main([*shared_args, "--output", str(first_dir)]) == 0
+    assert main([*shared_args, "--output", str(second_dir)]) == 0
+
+    assert (first_dir / "particles.json").read_text() == (second_dir / "particles.json").read_text()
+
+
+@pytest.mark.parametrize(
+    ("option", "value"),
+    [
+        ("--width-units", "0"),
+        ("--z-jitter", "-1"),
+        ("--cloud-radius", "-1"),
+    ],
+)
+def test_cli_rejects_invalid_numeric_options(tmp_path, font_path, option, value):
+    with pytest.raises(SystemExit) as exc_info:
+        main(["TEST", "--font", str(font_path), "--output", str(tmp_path), option, value])
+
+    assert exc_info.value.code == 2
 
 
 def test_cli_rejects_multiple_words(tmp_path, font_path):
-    exit_code = main(["TWO WORDS", "--font", str(font_path), "--output", str(tmp_path)])
+    with pytest.raises(SystemExit) as exc_info:
+        main(["TWO WORDS", "--font", str(font_path), "--output", str(tmp_path)])
 
-    assert exit_code == 2
+    assert exc_info.value.code == 2

@@ -42,16 +42,19 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
 
-    try:
-        args = parser.parse_args(argv)
-        if not args.text.strip() or any(char.isspace() for char in args.text):
-            parser.error("text must be a single non-empty word")
-        if not args.font.exists():
-            parser.error(f"font file not found: {args.font}")
-        if args.points < 1:
-            parser.error("--points must be at least 1")
-    except SystemExit as exc:
-        return int(exc.code)
+    args = parser.parse_args(argv)
+    if not args.text.strip() or any(char.isspace() for char in args.text):
+        parser.error("text must be a single non-empty word")
+    if not args.font.exists():
+        parser.error(f"font file not found: {args.font}")
+    if args.points < 1:
+        parser.error("--points must be at least 1")
+    if args.width_units <= 0:
+        parser.error("--width-units must be greater than 0")
+    if args.z_jitter < 0:
+        parser.error("--z-jitter must be greater than or equal to 0")
+    if args.cloud_radius is not None and args.cloud_radius <= 0:
+        parser.error("--cloud-radius must be greater than 0")
 
     args.output.mkdir(parents=True, exist_ok=True)
     text_mask = render_text_mask(args.text, args.font)
