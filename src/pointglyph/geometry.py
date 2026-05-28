@@ -65,3 +65,28 @@ def generate_cloud_positions(
     y = rng.normal(0.0, radius_y / 2.0, particle_count)
     z = rng.uniform(-z_jitter, z_jitter, particle_count)
     return np.column_stack((x, y, z)).astype(float)
+
+
+def generate_appear_progresses(
+    particle_count: int,
+    seed: int | None,
+    *,
+    delayed_min: float = 0.08,
+    delayed_max: float = 0.75,
+) -> np.ndarray:
+    if particle_count < 1:
+        raise ValueError("particle_count must be at least 1")
+    if not 0.0 <= delayed_min <= delayed_max <= 1.0:
+        raise ValueError("delayed progress range must be between 0 and 1")
+
+    immediate_count = particle_count // 2
+    delayed_count = particle_count - immediate_count
+    progresses = np.zeros(particle_count, dtype=float)
+    if delayed_count == 0:
+        return progresses
+
+    rng = np.random.default_rng(seed)
+    delayed = rng.uniform(delayed_min, delayed_max, delayed_count)
+    progresses[immediate_count:] = delayed
+    rng.shuffle(progresses)
+    return progresses

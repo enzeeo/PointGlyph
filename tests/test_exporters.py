@@ -11,6 +11,7 @@ def test_export_particles_json_uses_flat_arrays(tmp_path):
     start_positions = np.array([[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]])
     text_positions = np.array([[1.0, 2.0, 0.0], [3.0, 4.0, 0.0]])
     end_positions = np.array([[6.0, 7.0, 8.0], [9.0, 10.0, 11.0]])
+    appear_progresses = np.array([0.0, 0.25])
 
     export_particles_json(
         output,
@@ -19,6 +20,7 @@ def test_export_particles_json_uses_flat_arrays(tmp_path):
         start_positions=start_positions,
         text_positions=text_positions,
         end_positions=end_positions,
+        appear_progresses=appear_progresses,
     )
 
     raw = output.read_text()
@@ -34,6 +36,7 @@ def test_export_particles_json_uses_flat_arrays(tmp_path):
     assert data["attributes"]["startPositions"] == [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
     assert data["attributes"]["textPositions"] == [1.0, 2.0, 0.0, 3.0, 4.0, 0.0]
     assert data["attributes"]["endPositions"] == [6.0, 7.0, 8.0, 9.0, 10.0, 11.0]
+    assert data["attributes"]["appearProgresses"] == [0.0, 0.25]
     assert "sizes" not in data["attributes"]
     assert "colors" not in data["attributes"]
 
@@ -82,7 +85,13 @@ def test_export_manifest_json_omits_glb_and_includes_defaults(tmp_path):
             "preview": "solid_particle_preview.png",
             "solidPreview": "solid_preview.png",
             "particleCount": 8,
+            "recommendedForActualSolidText": False,
         },
     }
+    assert data["animation"]["particleReveal"]["attribute"] == "appearProgresses"
+    assert data["animation"]["particleReveal"]["initialVisibleFraction"] == 0.5
+    assert data["animation"]["solidText"]["texture"] == "solid_preview.png"
+    assert data["animation"]["solidText"]["recommendedRenderMode"] == "TexturePlane"
+    assert data["recommendedThreeJs"]["solidRenderMode"] == "TexturePlane"
     assert "text_mesh.glb" not in raw
     assert "recommendedThreeJs" in data

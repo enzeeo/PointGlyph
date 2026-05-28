@@ -1,7 +1,12 @@
 import numpy as np
 import pytest
 
-from pointglyph.geometry import Bounds, generate_cloud_positions, normalize_points_for_threejs
+from pointglyph.geometry import (
+    Bounds,
+    generate_appear_progresses,
+    generate_cloud_positions,
+    normalize_points_for_threejs,
+)
 
 
 def test_normalize_points_centers_and_flips_y():
@@ -69,6 +74,25 @@ def test_generate_cloud_positions_derives_radius_from_bounds():
     assert actual.shape == (particle_count, 3)
 
 
+def test_generate_appear_progresses_is_seeded():
+    first = generate_appear_progresses(8, seed=7)
+    second = generate_appear_progresses(8, seed=7)
+
+    np.testing.assert_array_equal(first, second)
+
+
+def test_generate_appear_progresses_delays_more_than_half():
+    particle_count = 9
+
+    progresses = generate_appear_progresses(particle_count, seed=7)
+
+    assert progresses.shape == (particle_count,)
+    assert np.count_nonzero(progresses == 0.0) == 4
+    assert np.count_nonzero(progresses > 0.0) == 5
+    assert progresses.max() <= 0.75
+    assert progresses[progresses > 0.0].min() >= 0.08
+
+
 def test_normalize_points_rejects_invalid_width():
     image_points = np.array([[0.0, 0.0], [100.0, 50.0]])
 
@@ -91,3 +115,8 @@ def test_generate_cloud_positions_rejects_invalid_arguments():
 
     with pytest.raises(ValueError, match="z_jitter"):
         generate_cloud_positions(5, bounds, cloud_radius=6.0, z_jitter=-0.1, seed=7)
+
+
+def test_generate_appear_progresses_rejects_invalid_count():
+    with pytest.raises(ValueError, match="particle_count"):
+        generate_appear_progresses(0, seed=7)

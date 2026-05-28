@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "name": "converg3d-bold",
+  "text": "CONVERG3D",
+  "font": "Arial Bold.ttf",
+  "particleCount": 6000,
+  "defaultParticleSize": 0.035,
+  "defaultColor": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "bounds": {
+    "width": 10.0,
+    "height": 1.1924882629107982,
+    "depth": 0.0
+  },
+  "files": {
+    "particles": "particles.json",
+    "preview": "preview.png",
+    "solidPreview": "solid_preview.png",
+    "solidParticles": "solid_particles.json",
+    "solidParticlePreview": "solid_particle_preview.png"
+  },
+  "variants": {
+    "default": {
+      "particles": "particles.json",
+      "preview": "preview.png",
+      "particleCount": 6000
+    },
+    "solid": {
+      "particles": "solid_particles.json",
+      "preview": "solid_particle_preview.png",
+      "solidPreview": "solid_preview.png",
+      "particleCount": 24000,
+      "recommendedForActualSolidText": false
+    }
+  },
+  "animation": {
+    "particleReveal": {
+      "attribute": "appearProgresses",
+      "initialVisibleFraction": 0.5,
+      "delayedProgressRange": [
+        0.08,
+        0.75
+      ],
+      "meaning": "Hide or fade each particle until global progress reaches its appearProgress."
+    },
+    "solidText": {
+      "texture": "solid_preview.png",
+      "recommendedRenderMode": "TexturePlane",
+      "fadeInAfterParticleReveal": true
+    }
+  },
+  "recommendedThreeJs": {
+    "renderMode": "BufferGeometryPoints",
+    "material": "ShaderMaterial or PointsMaterial",
+    "solidRenderMode": "TexturePlane",
+    "transparent": true,
+    "depthWrite": false
+  }
+}

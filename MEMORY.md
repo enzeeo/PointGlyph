@@ -36,3 +36,13 @@
 - Decided: Bold support should mean passing a real bold `.ttf` or `.otf` via the existing `--font` option.
 - Why: PointGlyph's model is exact font file in, rendered particle assets out; real bold fonts preserve glyph design better than synthetic thickening.
 - Rejected: A synthetic `--bold` flag, font-family/weight resolution, and manifest-only font weight metadata for this pass.
+
+### 2026-05-28 - Delayed Reveal and Solid Texture Plane
+- Decided: Particle JSON includes seeded `appearProgresses`, with floor-half of particles visible immediately and the rest revealed during text formation.
+- Why: The hero animation should reanimate over time instead of showing every particle at once.
+- Rejected: Adding a bundled frontend runtime or CLI flags for this default behavior.
+
+### 2026-05-28 - Actual Solid Text Uses `solid_preview.png`
+- Decided: `solid_preview.png` is the recommended actual solid-text phase, rendered as a Three.js texture plane sized to the exported bounds.
+- Why: Dense particles can look solid but are still visibly particle-based; a texture generated from the same font mask gives a crisp wordmark.
+- Rejected: Treating `solid_particles.json` as the authoritative solid phase or adding GLB/mesh output in this pass.

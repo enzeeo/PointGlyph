@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 from pointglyph.exporters import export_manifest_json, export_particles_json
-from pointglyph.geometry import generate_cloud_positions, normalize_points_for_threejs
+from pointglyph.geometry import generate_appear_progresses, generate_cloud_positions, normalize_points_for_threejs
 from pointglyph.preview import export_preview_png, export_solid_preview_png
 from pointglyph.sampling import sample_text_points
 from pointglyph.text_mask import render_text_mask
@@ -76,10 +76,13 @@ def main(argv: list[str] | None = None) -> int:
     start_positions = generate_cloud_positions(args.points, bounds, args.cloud_radius, args.z_jitter, args.seed)
     end_seed = None if args.seed is None else args.seed + 1
     end_positions = generate_cloud_positions(args.points, bounds, args.cloud_radius, args.z_jitter, end_seed)
+    appear_seed = None if args.seed is None else args.seed + 2
+    appear_progresses = generate_appear_progresses(args.points, appear_seed)
     solid_particle_count = args.points * 4
-    solid_sample_seed = None if args.seed is None else args.seed + 2
-    solid_start_seed = None if args.seed is None else args.seed + 3
-    solid_end_seed = None if args.seed is None else args.seed + 4
+    solid_sample_seed = None if args.seed is None else args.seed + 3
+    solid_start_seed = None if args.seed is None else args.seed + 4
+    solid_end_seed = None if args.seed is None else args.seed + 5
+    solid_appear_seed = None if args.seed is None else args.seed + 6
     solid_image_points = sample_text_points(text_mask.mask, solid_particle_count, solid_sample_seed)
     solid_text_positions, solid_bounds = normalize_points_for_threejs(
         solid_image_points,
@@ -100,6 +103,7 @@ def main(argv: list[str] | None = None) -> int:
         args.z_jitter,
         solid_end_seed,
     )
+    solid_appear_progresses = generate_appear_progresses(solid_particle_count, solid_appear_seed)
 
     export_particles_json(
         args.output / "particles.json",
@@ -108,6 +112,7 @@ def main(argv: list[str] | None = None) -> int:
         start_positions=start_positions,
         text_positions=text_positions,
         end_positions=end_positions,
+        appear_progresses=appear_progresses,
     )
     export_particles_json(
         args.output / "solid_particles.json",
@@ -116,6 +121,7 @@ def main(argv: list[str] | None = None) -> int:
         start_positions=solid_start_positions,
         text_positions=solid_text_positions,
         end_positions=solid_end_positions,
+        appear_progresses=solid_appear_progresses,
     )
     export_manifest_json(
         args.output / "manifest.json",

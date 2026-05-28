@@ -18,6 +18,7 @@ def export_particles_json(
     start_positions: np.ndarray,
     text_positions: np.ndarray,
     end_positions: np.ndarray,
+    appear_progresses: np.ndarray,
 ) -> None:
     data = {
         "version": 1,
@@ -30,6 +31,7 @@ def export_particles_json(
             "startPositions": _flat(start_positions),
             "textPositions": _flat(text_positions),
             "endPositions": _flat(end_positions),
+            "appearProgresses": _flat(appear_progresses),
         },
     }
     Path(output_path).write_text(json.dumps(data, separators=(",", ":")))
@@ -73,11 +75,26 @@ def export_manifest_json(
                 "preview": "solid_particle_preview.png",
                 "solidPreview": "solid_preview.png",
                 "particleCount": particle_count * 4,
+                "recommendedForActualSolidText": False,
+            },
+        },
+        "animation": {
+            "particleReveal": {
+                "attribute": "appearProgresses",
+                "initialVisibleFraction": 0.5,
+                "delayedProgressRange": [0.08, 0.75],
+                "meaning": "Hide or fade each particle until global progress reaches its appearProgress.",
+            },
+            "solidText": {
+                "texture": "solid_preview.png",
+                "recommendedRenderMode": "TexturePlane",
+                "fadeInAfterParticleReveal": True,
             },
         },
         "recommendedThreeJs": {
             "renderMode": "BufferGeometryPoints",
             "material": "ShaderMaterial or PointsMaterial",
+            "solidRenderMode": "TexturePlane",
             "transparent": True,
             "depthWrite": False,
         },

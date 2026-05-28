@@ -84,14 +84,19 @@ def test_cli_creates_required_files(tmp_path, font_path):
     assert len(particles["attributes"]["startPositions"]) == points * 3
     assert len(particles["attributes"]["textPositions"]) == points * 3
     assert len(particles["attributes"]["endPositions"]) == points * 3
+    assert len(particles["attributes"]["appearProgresses"]) == points
+    assert particles["attributes"]["appearProgresses"].count(0.0) == 12
     assert solid_particles["particleCount"] == points * 4
     assert len(solid_particles["attributes"]["startPositions"]) == points * 4 * 3
     assert len(solid_particles["attributes"]["textPositions"]) == points * 4 * 3
     assert len(solid_particles["attributes"]["endPositions"]) == points * 4 * 3
+    assert len(solid_particles["attributes"]["appearProgresses"]) == points * 4
     assert manifest["files"]["solidPreview"] == "solid_preview.png"
     assert manifest["files"]["solidParticles"] == "solid_particles.json"
     assert manifest["files"]["solidParticlePreview"] == "solid_particle_preview.png"
     assert manifest["variants"]["solid"]["particleCount"] == points * 4
+    assert manifest["animation"]["solidText"]["texture"] == "solid_preview.png"
+    assert manifest["animation"]["particleReveal"]["attribute"] == "appearProgresses"
     preview_image = Image.open(output_dir / "preview.png")
     solid_particle_image = Image.open(output_dir / "solid_particle_preview.png")
     solid_image = Image.open(output_dir / "solid_preview.png")

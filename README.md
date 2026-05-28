@@ -66,13 +66,17 @@ Three.js buffer attributes:
   "attributes": {
     "startPositions": [0.0, 0.0, 0.0],
     "textPositions": [0.0, 0.0, 0.0],
-    "endPositions": [0.0, 0.0, 0.0]
+    "endPositions": [0.0, 0.0, 0.0],
+    "appearProgresses": [0.0, 0.24, 0.0]
   }
 }
 ```
 
 The arrays above are abbreviated. In real output, each position array contains
 `particleCount * 3` numbers: `x, y, z` for every particle.
+`appearProgresses` contains one number per particle. At most half of those
+values are `0.0`; the rest are seeded values between `0.08` and `0.75` so a
+runtime can reveal particles after the animation starts.
 
 ## Manifest Data
 
@@ -109,12 +113,27 @@ The arrays above are abbreviated. In real output, each position array contains
       "particles": "solid_particles.json",
       "preview": "solid_particle_preview.png",
       "solidPreview": "solid_preview.png",
-      "particleCount": 24000
+      "particleCount": 24000,
+      "recommendedForActualSolidText": false
+    }
+  },
+  "animation": {
+    "particleReveal": {
+      "attribute": "appearProgresses",
+      "initialVisibleFraction": 0.5,
+      "delayedProgressRange": [0.08, 0.75],
+      "meaning": "Hide or fade each particle until global progress reaches its appearProgress."
+    },
+    "solidText": {
+      "texture": "solid_preview.png",
+      "recommendedRenderMode": "TexturePlane",
+      "fadeInAfterParticleReveal": true
     }
   },
   "recommendedThreeJs": {
     "renderMode": "BufferGeometryPoints",
     "material": "ShaderMaterial or PointsMaterial",
+    "solidRenderMode": "TexturePlane",
     "transparent": true,
     "depthWrite": false
   }
@@ -126,9 +145,10 @@ manifest.
 
 `preview.png` shows the sampled particle positions. `solid_preview.png` is a
 transparent text render using the same font mask and canvas size, so a frontend
-can fade it over the particle text for a solid-text phase. `solid_particles.json`
-uses the same schema as `particles.json` with 4x the requested particle count for
-a denser particle-only solid state.
+can fade it over the particle text for an actual solid-text phase.
+`solid_particles.json` uses the same schema as `particles.json` with 4x the
+requested particle count for compatibility with particle-only renderers, but it
+is not the recommended solid text output.
 
 ## Three.js Loading Sketch
 
@@ -148,15 +168,34 @@ geometry.setAttribute(
   "endPosition",
   new THREE.Float32BufferAttribute(data.attributes.endPositions, 3)
 );
+geometry.setAttribute(
+  "appearProgress",
+  new THREE.Float32BufferAttribute(data.attributes.appearProgresses, 1)
+);
+
+const manifest = await fetch("/exports/converg3d/manifest.json").then((res) => res.json());
+const solidTexture = await new THREE.TextureLoader().loadAsync(
+  `/exports/converg3d/${manifest.animation.solidText.texture}`
+);
+const solidMaterial = new THREE.MeshBasicMaterial({
+  map: solidTexture,
+  transparent: true,
+  opacity: 0
+});
+const solidText = new THREE.Mesh(
+  new THREE.PlaneGeometry(data.bounds.width, data.bounds.height),
+  solidMaterial
+);
 ```
 
 Interpolate between `startPositions`, `textPositions`, and `endPositions` in a
-shader or animation loop with a single progress value.
+shader or animation loop with a single progress value. Gate each particle's
+alpha against its `appearProgress` attribute, then fade `solidText.material`
+from `0` to `1` once the particle wordmark has formed.
 
 ## Future Work
 
 - Edge-weighted sampling for sharper letter boundaries.
-- Optional per-particle delays or motion factors.
 - Optional `text_mesh.glb` export.
 - Published package or `pipx` install path.
 - Optional JavaScript helper after the data format stabilizes.
