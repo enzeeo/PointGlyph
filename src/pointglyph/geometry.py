@@ -35,7 +35,7 @@ def normalize_points_for_threejs(points: np.ndarray, width_units: float) -> tupl
 def generate_cloud_positions(
     particle_count: int,
     bounds: Bounds,
-    cloud_radius: float,
+    cloud_radius: float | None,
     z_jitter: float,
     seed: int | None,
 ) -> np.ndarray:
@@ -45,7 +45,14 @@ def generate_cloud_positions(
         raise ValueError("z_jitter must be greater than or equal to 0")
 
     rng = np.random.default_rng(seed)
-    x = rng.normal(0.0, cloud_radius / 2.0, particle_count)
-    y = rng.normal(0.0, cloud_radius / 2.0, particle_count)
+    if cloud_radius is None:
+        radius_x = bounds.width * 0.75
+        radius_y = max(bounds.height, bounds.width * 0.25)
+    else:
+        radius_x = cloud_radius
+        radius_y = cloud_radius
+
+    x = rng.normal(0.0, radius_x / 2.0, particle_count)
+    y = rng.normal(0.0, radius_y / 2.0, particle_count)
     z = rng.uniform(-z_jitter, z_jitter, particle_count)
     return np.column_stack((x, y, z)).astype(float)

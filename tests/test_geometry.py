@@ -27,6 +27,17 @@ def test_generate_cloud_positions_is_seeded_and_jitters_z():
     assert np.max(np.abs(first[:, 2])) <= 0.1
 
 
+def test_generate_cloud_positions_derives_radius_from_bounds():
+    bounds = Bounds(width=10.0, height=2.0, depth=0.0)
+
+    first = generate_cloud_positions(5, bounds, cloud_radius=None, z_jitter=0.1, seed=7)
+    second = generate_cloud_positions(5, bounds, cloud_radius=None, z_jitter=0.1, seed=7)
+
+    np.testing.assert_array_equal(first, second)
+    assert first.shape == (5, 3)
+    assert np.max(np.abs(first[:, 2])) <= 0.1
+
+
 def test_normalize_points_rejects_invalid_width():
     image_points = np.array([[0.0, 0.0], [100.0, 50.0]])
 
