@@ -16,3 +16,8 @@
 - Decided: Include a minimal Three.js `BufferGeometry` snippet in docs, but no frontend code.
 - Why: Frontend developers need proof that the output is usable, while the project must remain an asset generator.
 - Rejected: A bundled website, viewer, or JavaScript helper in v1.
+
+### 2026-05-27 - Implementation Goal
+- Decided: The plan approval goal is an end-to-end v1 CLI: word plus font in, `manifest.json`, `particles.json`, and `preview.png` out.
+- Why: This gives implementation agents a concrete finish line tied to the approved MVP scope.
+- Rejected: Treating package scaffolding or partial module work as sufficient without generated assets and docs.

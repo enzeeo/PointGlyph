@@ -14,6 +14,16 @@ into animation-ready particle text assets for Three.js.
 The first release is an asset generator, not a viewer. It should produce compact
 data that a frontend developer can load directly into `BufferGeometry`.
 
+## Implementation Goal
+
+Ship a maintainable v1 CLI that proves the full asset pipeline end to end:
+word plus font in, `manifest.json`, `particles.json`, and `preview.png` out.
+
+The implementation plan is approved only when it shows how to deliver that path
+with deterministic seeded output, readable text-state particles, focused tests,
+and documentation that lets a frontend developer load the generated JSON into
+Three.js without extra conversion code.
+
 ## Non-Goals
 
 - No website, landing page, or Three.js viewer.
