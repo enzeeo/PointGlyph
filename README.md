@@ -54,6 +54,43 @@ Three.js buffer attributes:
 }
 ```
 
+The arrays above are abbreviated. In real output, each position array contains
+`particleCount * 3` numbers: `x, y, z` for every particle.
+
+## Manifest Data
+
+`manifest.json` describes the generated asset set and rendering defaults:
+
+```json
+{
+  "version": 1,
+  "name": "converg3d",
+  "text": "CONVERG3D",
+  "font": "Inter-Bold.ttf",
+  "particleCount": 6000,
+  "defaultParticleSize": 0.035,
+  "defaultColor": [1.0, 1.0, 1.0],
+  "bounds": {
+    "width": 10.0,
+    "height": 2.4,
+    "depth": 0.0
+  },
+  "files": {
+    "particles": "particles.json",
+    "preview": "preview.png"
+  },
+  "recommendedThreeJs": {
+    "renderMode": "BufferGeometryPoints",
+    "material": "ShaderMaterial or PointsMaterial",
+    "transparent": true,
+    "depthWrite": false
+  }
+}
+```
+
+V1 does not include a `textMesh` field or reference `text_mesh.glb` in the
+manifest.
+
 ## Three.js Loading Sketch
 
 ```js
