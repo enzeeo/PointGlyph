@@ -58,6 +58,26 @@ def test_cli_creates_required_files(tmp_path, font_path):
     assert len(particles["attributes"]["endPositions"]) == points * 3
 
 
+def test_cli_accepts_preview_flag_and_creates_preview(tmp_path, font_path):
+    output_dir = tmp_path / "export"
+
+    exit_code = main(
+        [
+            "TEST",
+            "--font",
+            str(font_path),
+            "--output",
+            str(output_dir),
+            "--points",
+            "25",
+            "--preview",
+        ]
+    )
+
+    assert exit_code == 0
+    assert (output_dir / "preview.png").exists()
+
+
 def test_cli_same_seed_creates_identical_particles(tmp_path, font_path):
     first_dir = tmp_path / "first"
     second_dir = tmp_path / "second"

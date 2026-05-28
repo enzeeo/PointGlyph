@@ -12,10 +12,8 @@
   `uv run pointglyph TEST --font /System/Library/Fonts/Supplemental/Arial.ttf --points 50 --output /tmp/pointglyph-test-verify --seed 42`
 
 ## In Progress
-- Paused during final code review follow-up.
-- Final reviewer rejected completion for two issues:
-  1. `--preview` option is required by the spec but missing from `src/pointglyph/cli.py`.
-  2. Repo hygiene needs `.gitignore` rules and cleanup/decision for untracked artifacts.
+- No implementation work remains from the approved MVP plan.
+- `--preview` support and repository hygiene follow-up were completed after the pause.
 
 ## Decisions Made
 - V1 remains a Python package CLI only.
@@ -24,11 +22,8 @@
 - `particles.json` uses flat arrays and manifest stores shared defaults.
 
 ## Open Questions
-- Decide whether `uv.lock` should be tracked or ignored. It is currently untracked.
-- `data/state_store.db/mem%3Ahealth.bin` is untracked; inspect/confirm whether it is generated runtime state before removing or ignoring.
+- `data/state_store.db/mem%3Ahealth.bin` has unrelated local modifications. It was intentionally left untouched.
 
 ## Next Session Priorities
-- Add `--preview` support while preserving default preview generation, with a focused CLI test.
-- Add top-level `.gitignore` for `.DS_Store`, `__pycache__/`, Python caches, and likely local runtime artifacts.
-- Clean only generated/unwanted untracked artifacts after confirming `data/` ownership.
-- Re-run `uv run pytest -q`, CLI smoke, JSON validation, then final review again.
+- Decide whether to keep or discard the unrelated local `data/state_store.db/mem%3Ahealth.bin` modification.
+- Ship or open a PR from `codex/pointglyph-mvp` when ready.

@@ -36,6 +36,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--cloud-radius", type=float, default=None, help="Scatter cloud radius")
     parser.add_argument("--z-jitter", type=float, default=0.02, help="Cloud z jitter")
     parser.add_argument("--color", type=_parse_color, default=(1.0, 1.0, 1.0), help="Default RGB color")
+    parser.add_argument(
+        "--preview",
+        action="store_const",
+        const=True,
+        default=argparse.SUPPRESS,
+        help="Accepted for compatibility; preview generation is always enabled",
+    )
     return parser
 
 
