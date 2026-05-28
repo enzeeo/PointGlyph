@@ -1,0 +1,87 @@
+import argparse
+import sys
+from pathlib import Path
+
+from pointglyph.exporters import export_manifest_json, export_particles_json
+from pointglyph.geometry import generate_cloud_positions, normalize_points_for_threejs
+from pointglyph.preview import export_preview_png
+from pointglyph.sampling import sample_text_points
+from pointglyph.text_mask import render_text_mask
+
+
+def _parse_color(raw: str) -> tuple[float, float, float]:
+    parts = raw.split(",")
+    if len(parts) != 3:
+        raise argparse.ArgumentTypeError("color must use r,g,b format")
+
+    try:
+        channels = tuple(float(part) for part in parts)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("color must use numeric r,g,b values") from exc
+
+    if any(channel < 0.0 or channel > 1.0 for channel in channels):
+        raise argparse.ArgumentTypeError("color channels must be between 0 and 1")
+
+    return channels
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Generate Three.js-ready particle text assets.")
+    parser.add_argument("text", help="Single word to render")
+    parser.add_argument("--font", required=True, type=Path, help="Path to a .ttf or .otf font")
+    parser.add_argument("--output", required=True, type=Path, help="Output directory")
+    parser.add_argument("--points", type=int, default=6000, help="Target particle count")
+    parser.add_argument("--seed", type=int, default=None, help="Random seed for reproducible output")
+    parser.add_argument("--width-units", type=float, default=10.0, help="Normalized text width")
+    parser.add_argument("--cloud-radius", type=float, default=None, help="Scatter cloud radius")
+    parser.add_argument("--z-jitter", type=float, default=0.02, help="Cloud z jitter")
+    parser.add_argument("--color", type=_parse_color, default=(1.0, 1.0, 1.0), help="Default RGB color")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+
+    try:
+        args = parser.parse_args(argv)
+        if not args.text.strip() or any(char.isspace() for char in args.text):
+            parser.error("text must be a single non-empty word")
+        if not args.font.exists():
+            parser.error(f"font file not found: {args.font}")
+        if args.points < 1:
+            parser.error("--points must be at least 1")
+    except SystemExit as exc:
+        return int(exc.code)
+
+    args.output.mkdir(parents=True, exist_ok=True)
+    text_mask = render_text_mask(args.text, args.font)
+    image_points = sample_text_points(text_mask.mask, args.points, args.seed)
+    text_positions, bounds = normalize_points_for_threejs(image_points, args.width_units)
+    start_positions = generate_cloud_positions(args.points, bounds, args.cloud_radius, args.z_jitter, args.seed)
+    end_seed = None if args.seed is None else args.seed + 1
+    end_positions = generate_cloud_positions(args.points, bounds, args.cloud_radius, args.z_jitter, end_seed)
+
+    export_particles_json(
+        args.output / "particles.json",
+        text=args.text,
+        bounds=bounds,
+        start_positions=start_positions,
+        text_positions=text_positions,
+        end_positions=end_positions,
+    )
+    export_manifest_json(
+        args.output / "manifest.json",
+        name=args.output.name,
+        text=args.text,
+        font_name=args.font.name,
+        particle_count=args.points,
+        bounds=bounds,
+        default_particle_size=0.035,
+        default_color=args.color,
+    )
+    export_preview_png(args.output / "preview.png", text_positions, bounds)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

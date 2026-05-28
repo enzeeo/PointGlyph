@@ -1,6 +1,9 @@
+import json
+
 import numpy as np
 from PIL import Image
 
+from pointglyph.cli import main
 from pointglyph.geometry import Bounds
 from pointglyph.preview import export_preview_png
 from pointglyph.text_mask import render_text_mask
@@ -24,3 +27,34 @@ def test_export_preview_png_creates_image(tmp_path):
     image = Image.open(output)
     assert image.size[0] > 0
     assert image.size[1] > 0
+
+
+def test_cli_creates_required_files(tmp_path, font_path):
+    output_dir = tmp_path / "export"
+
+    exit_code = main(
+        [
+            "TEST",
+            "--font",
+            str(font_path),
+            "--points",
+            "25",
+            "--output",
+            str(output_dir),
+            "--seed",
+            "42",
+        ]
+    )
+
+    assert exit_code == 0
+    assert (output_dir / "manifest.json").exists()
+    assert (output_dir / "particles.json").exists()
+    assert (output_dir / "preview.png").exists()
+    particles = json.loads((output_dir / "particles.json").read_text())
+    assert len(particles["attributes"]["textPositions"]) == 25 * 3
+
+
+def test_cli_rejects_multiple_words(tmp_path, font_path):
+    exit_code = main(["TWO WORDS", "--font", str(font_path), "--output", str(tmp_path)])
+
+    assert exit_code == 2
