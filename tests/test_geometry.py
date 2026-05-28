@@ -29,13 +29,30 @@ def test_generate_cloud_positions_is_seeded_and_jitters_z():
 
 def test_generate_cloud_positions_derives_radius_from_bounds():
     bounds = Bounds(width=10.0, height=2.0, depth=0.0)
+    particle_count = 5
+    z_jitter = 0.1
+    seed = 7
 
-    first = generate_cloud_positions(5, bounds, cloud_radius=None, z_jitter=0.1, seed=7)
-    second = generate_cloud_positions(5, bounds, cloud_radius=None, z_jitter=0.1, seed=7)
+    actual = generate_cloud_positions(
+        particle_count,
+        bounds,
+        cloud_radius=None,
+        z_jitter=z_jitter,
+        seed=seed,
+    )
+    rng = np.random.default_rng(seed)
+    radius_x = bounds.width * 0.75
+    radius_y = max(bounds.height, bounds.width * 0.25)
+    expected = np.column_stack(
+        (
+            rng.normal(0.0, radius_x / 2.0, particle_count),
+            rng.normal(0.0, radius_y / 2.0, particle_count),
+            rng.uniform(-z_jitter, z_jitter, particle_count),
+        )
+    )
 
-    np.testing.assert_array_equal(first, second)
-    assert first.shape == (5, 3)
-    assert np.max(np.abs(first[:, 2])) <= 0.1
+    np.testing.assert_allclose(actual, expected)
+    assert actual.shape == (particle_count, 3)
 
 
 def test_normalize_points_rejects_invalid_width():
