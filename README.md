@@ -32,6 +32,20 @@ pointglyph "CONVERG3D" \
   --seed 42
 ```
 
+## Font Files
+
+PointGlyph uses the exact `.ttf` or `.otf` file passed to `--font`. To generate
+bold assets, pass a real bold font file:
+
+```bash
+pointglyph "CONVERG3D" --font ./fonts/Inter-Regular.ttf --output ./exports/normal
+pointglyph "CONVERG3D" --font ./fonts/Inter-Bold.ttf --output ./exports/bold
+```
+
+The CLI intentionally does not include a synthetic `--bold` flag, font-family
+lookup, or font-weight inference. The generated `manifest.json` records the
+supplied font file basename.
+
 ## Particle Data
 
 `particles.json` uses flat arrays so a frontend can upload them directly into

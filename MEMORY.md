@@ -31,3 +31,8 @@
 - Decided: Each export also writes `solid_particles.json` and `solid_particle_preview.png` at 4x the requested particle count.
 - Why: This gives consumers a particle-only solid-looking state while preserving the crisp `solid_preview.png` texture-plane option.
 - Rejected: Replacing `particles.json`, adding a CLI flag, or adding mesh/GLB output.
+
+### 2026-05-28 - Bold Means Real Font File
+- Decided: Bold support should mean passing a real bold `.ttf` or `.otf` via the existing `--font` option.
+- Why: PointGlyph's model is exact font file in, rendered particle assets out; real bold fonts preserve glyph design better than synthetic thickening.
+- Rejected: A synthetic `--bold` flag, font-family/weight resolution, and manifest-only font weight metadata for this pass.

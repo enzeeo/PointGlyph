@@ -19,6 +19,14 @@ def test_render_text_mask_has_content(font_path):
     assert result.bounds.height > 0
 
 
+def test_render_text_mask_accepts_bold_font(bold_font_path):
+    result = render_text_mask("TEST", bold_font_path)
+
+    assert result.mask.getbbox() is not None
+    assert result.bounds.width > 0
+    assert result.bounds.height > 0
+
+
 def test_export_preview_png_creates_image(tmp_path):
     output = tmp_path / "preview.png"
     points = np.array([[-1.0, -1.0, 0.0], [1.0, 1.0, 0.0], [0.0, 0.0, 0.0]])
@@ -89,6 +97,31 @@ def test_cli_creates_required_files(tmp_path, font_path):
     solid_image = Image.open(output_dir / "solid_preview.png")
     assert solid_particle_image.size == preview_image.size
     assert solid_image.size == preview_image.size
+
+
+def test_cli_accepts_bold_font_and_records_manifest_font(tmp_path, bold_font_path):
+    output_dir = tmp_path / "bold"
+
+    exit_code = main(
+        [
+            "TEST",
+            "--font",
+            str(bold_font_path),
+            "--points",
+            "25",
+            "--output",
+            str(output_dir),
+            "--seed",
+            "42",
+        ]
+    )
+
+    assert exit_code == 0
+    assert (output_dir / "manifest.json").exists()
+    assert (output_dir / "particles.json").exists()
+    assert (output_dir / "preview.png").exists()
+    manifest = json.loads((output_dir / "manifest.json").read_text())
+    assert manifest["font"] == bold_font_path.name
 
 
 def test_cli_accepts_preview_flag_and_creates_preview(tmp_path, font_path):
