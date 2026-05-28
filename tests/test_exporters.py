@@ -64,6 +64,25 @@ def test_export_manifest_json_omits_glb_and_includes_defaults(tmp_path):
     assert data["defaultParticleSize"] == 0.035
     assert data["defaultColor"] == [1.0, 0.9, 0.8]
     assert data["bounds"] == {"width": 10.0, "height": 2.0, "depth": 0.0}
-    assert data["files"] == {"particles": "particles.json", "preview": "preview.png"}
+    assert data["files"] == {
+        "particles": "particles.json",
+        "preview": "preview.png",
+        "solidPreview": "solid_preview.png",
+        "solidParticles": "solid_particles.json",
+        "solidParticlePreview": "solid_particle_preview.png",
+    }
+    assert data["variants"] == {
+        "default": {
+            "particles": "particles.json",
+            "preview": "preview.png",
+            "particleCount": 2,
+        },
+        "solid": {
+            "particles": "solid_particles.json",
+            "preview": "solid_particle_preview.png",
+            "solidPreview": "solid_preview.png",
+            "particleCount": 8,
+        },
+    }
     assert "text_mesh.glb" not in raw
     assert "recommendedThreeJs" in data

@@ -16,6 +16,20 @@ def test_normalize_points_centers_and_flips_y():
     assert bounds == Bounds(width=10.0, height=5.0, depth=0.0)
 
 
+def test_normalize_points_can_use_source_bounds():
+    image_points = np.array([[25.0, 20.0], [75.0, 40.0]])
+
+    points, bounds = normalize_points_for_threejs(
+        image_points,
+        width_units=10.0,
+        source_bounds=(0.0, 0.0, 100.0, 50.0),
+    )
+
+    np.testing.assert_allclose(points[:, 0], [-2.5, 2.5])
+    np.testing.assert_allclose(points[:, 1], [0.5, -1.5])
+    assert bounds == Bounds(width=10.0, height=5.0, depth=0.0)
+
+
 def test_generate_cloud_positions_is_seeded_and_jitters_z():
     bounds = Bounds(width=10.0, height=2.0, depth=0.0)
 

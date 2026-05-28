@@ -21,3 +21,13 @@
 - Decided: The plan approval goal is an end-to-end v1 CLI: word plus font in, `manifest.json`, `particles.json`, and `preview.png` out.
 - Why: This gives implementation agents a concrete finish line tied to the approved MVP scope.
 - Rejected: Treating package scaffolding or partial module work as sufficient without generated assets and docs.
+
+### 2026-05-27 - Solid Preview Overlay
+- Decided: Exports include `solid_preview.png` as a transparent solid text render, separate from particle `preview.png`.
+- Why: Frontends can fade a solid glyph overlay in when particles cluster, then fade it out as particles disperse.
+- Rejected: Adding mesh or GLB export for this; solid preview is a 2D overlay asset only.
+
+### 2026-05-28 - Dense Solid Particle Variant
+- Decided: Each export also writes `solid_particles.json` and `solid_particle_preview.png` at 4x the requested particle count.
+- Why: This gives consumers a particle-only solid-looking state while preserving the crisp `solid_preview.png` texture-plane option.
+- Rejected: Replacing `particles.json`, adding a CLI flag, or adding mesh/GLB output.

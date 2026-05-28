@@ -1,3 +1,12 @@
+Metadata-Version: 2.4
+Name: pointglyph
+Version: 0.1.0
+Summary: Convert text into Three.js-ready particle glyph assets.
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.26
+Requires-Dist: Pillow>=10.0
+
 # PointGlyph
 
 PointGlyph converts a single word into lightweight Three.js-ready particle text
@@ -8,9 +17,6 @@ It generates:
 - `manifest.json`
 - `particles.json`
 - `preview.png`
-- `solid_preview.png`
-- `solid_particles.json`
-- `solid_particle_preview.png`
 
 PointGlyph does not build a website, viewer, or scroll animation runtime.
 
@@ -80,23 +86,7 @@ The arrays above are abbreviated. In real output, each position array contains
   },
   "files": {
     "particles": "particles.json",
-    "preview": "preview.png",
-    "solidPreview": "solid_preview.png",
-    "solidParticles": "solid_particles.json",
-    "solidParticlePreview": "solid_particle_preview.png"
-  },
-  "variants": {
-    "default": {
-      "particles": "particles.json",
-      "preview": "preview.png",
-      "particleCount": 6000
-    },
-    "solid": {
-      "particles": "solid_particles.json",
-      "preview": "solid_particle_preview.png",
-      "solidPreview": "solid_preview.png",
-      "particleCount": 24000
-    }
+    "preview": "preview.png"
   },
   "recommendedThreeJs": {
     "renderMode": "BufferGeometryPoints",
@@ -109,12 +99,6 @@ The arrays above are abbreviated. In real output, each position array contains
 
 V1 does not include a `textMesh` field or reference `text_mesh.glb` in the
 manifest.
-
-`preview.png` shows the sampled particle positions. `solid_preview.png` is a
-transparent text render using the same font mask and canvas size, so a frontend
-can fade it over the particle text for a solid-text phase. `solid_particles.json`
-uses the same schema as `particles.json` with 4x the requested particle count for
-a denser particle-only solid state.
 
 ## Three.js Loading Sketch
 

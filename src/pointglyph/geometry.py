@@ -13,13 +13,22 @@ class Bounds:
         return {"width": self.width, "height": self.height, "depth": self.depth}
 
 
-def normalize_points_for_threejs(points: np.ndarray, width_units: float) -> tuple[np.ndarray, Bounds]:
+def normalize_points_for_threejs(
+    points: np.ndarray,
+    width_units: float,
+    source_bounds: tuple[float, float, float, float] | None = None,
+) -> tuple[np.ndarray, Bounds]:
     if width_units <= 0:
         raise ValueError("width_units must be greater than 0")
 
     numeric_points = np.asarray(points, dtype=float)
-    min_xy = numeric_points.min(axis=0)
-    max_xy = numeric_points.max(axis=0)
+    if source_bounds is None:
+        min_xy = numeric_points.min(axis=0)
+        max_xy = numeric_points.max(axis=0)
+    else:
+        left, top, right, bottom = source_bounds
+        min_xy = np.array([left, top], dtype=float)
+        max_xy = np.array([right, bottom], dtype=float)
     span = max_xy - min_xy
     if span[0] == 0:
         raise ValueError("Cannot normalize points with zero width span")

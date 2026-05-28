@@ -55,7 +55,26 @@ def export_manifest_json(
         "defaultParticleSize": default_particle_size,
         "defaultColor": [float(channel) for channel in default_color],
         "bounds": bounds.to_dict(),
-        "files": {"particles": "particles.json", "preview": "preview.png"},
+        "files": {
+            "particles": "particles.json",
+            "preview": "preview.png",
+            "solidPreview": "solid_preview.png",
+            "solidParticles": "solid_particles.json",
+            "solidParticlePreview": "solid_particle_preview.png",
+        },
+        "variants": {
+            "default": {
+                "particles": "particles.json",
+                "preview": "preview.png",
+                "particleCount": particle_count,
+            },
+            "solid": {
+                "particles": "solid_particles.json",
+                "preview": "solid_particle_preview.png",
+                "solidPreview": "solid_preview.png",
+                "particleCount": particle_count * 4,
+            },
+        },
         "recommendedThreeJs": {
             "renderMode": "BufferGeometryPoints",
             "material": "ShaderMaterial or PointsMaterial",
