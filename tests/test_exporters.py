@@ -53,6 +53,14 @@ def test_export_manifest_json_omits_glb_and_includes_defaults(tmp_path):
         bounds=Bounds(width=10.0, height=2.0),
         default_particle_size=0.035,
         default_color=(1.0, 0.9, 0.8),
+        alignment={
+            "contentBox": {"left": 0, "top": 0, "right": 1200, "bottom": 240, "width": 1200, "height": 240},
+            "solidTexture": {"width": 1200, "height": 240, "padding": 0, "inset": [0, 0, 0, 0]},
+            "worldToTexture": {
+                "world": {"left": -5.0, "right": 5.0, "top": 1.0, "bottom": -1.0},
+                "texture": {"left": 0, "right": 1200, "top": 0, "bottom": 240},
+            },
+        },
     )
 
     raw = output.read_text()
@@ -67,6 +75,14 @@ def test_export_manifest_json_omits_glb_and_includes_defaults(tmp_path):
     assert data["defaultParticleSize"] == 0.035
     assert data["defaultColor"] == [1.0, 0.9, 0.8]
     assert data["bounds"] == {"width": 10.0, "height": 2.0, "depth": 0.0}
+    assert data["alignment"] == {
+        "contentBox": {"left": 0, "top": 0, "right": 1200, "bottom": 240, "width": 1200, "height": 240},
+        "solidTexture": {"width": 1200, "height": 240, "padding": 0, "inset": [0, 0, 0, 0]},
+        "worldToTexture": {
+            "world": {"left": -5.0, "right": 5.0, "top": 1.0, "bottom": -1.0},
+            "texture": {"left": 0, "right": 1200, "top": 0, "bottom": 240},
+        },
+    }
     assert data["files"] == {
         "particles": "particles.json",
         "preview": "preview.png",
@@ -90,8 +106,15 @@ def test_export_manifest_json_omits_glb_and_includes_defaults(tmp_path):
     }
     assert data["animation"]["particleReveal"]["attribute"] == "appearProgresses"
     assert data["animation"]["particleReveal"]["initialVisibleFraction"] == 0.5
+    assert data["animation"]["particleFadeOut"]["startProgress"] == 0.75
+    assert data["animation"]["particleFadeOut"]["endProgress"] == 1.0
+    assert data["animation"]["particleFadeOut"]["finalOpacity"] == 0.0
     assert data["animation"]["solidText"]["texture"] == "solid_preview.png"
     assert data["animation"]["solidText"]["recommendedRenderMode"] == "TexturePlane"
+    assert data["animation"]["solidText"]["color"] == [0.0, 0.0, 0.0]
+    assert data["animation"]["solidText"]["finalOpacity"] == 1.0
+    assert data["animation"]["solidText"]["planeSize"] == [10.0, 2.0]
+    assert data["animation"]["solidText"]["planeCenter"] == [0.0, 0.0, 0.0]
     assert data["recommendedThreeJs"]["solidRenderMode"] == "TexturePlane"
     assert "text_mesh.glb" not in raw
     assert "recommendedThreeJs" in data

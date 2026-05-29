@@ -26,6 +26,23 @@ class TextMask:
     bounds: PixelBounds
 
 
+@dataclass(frozen=True)
+class WordmarkSource:
+    mask: Image.Image
+    bounds: PixelBounds
+
+    @property
+    def source_bounds(self) -> tuple[float, float, float, float]:
+        return (0.0, 0.0, float(self.bounds.width), float(self.bounds.height))
+
+
+def create_wordmark_source(text_mask: TextMask) -> WordmarkSource:
+    cropped = text_mask.mask.crop(
+        (text_mask.bounds.left, text_mask.bounds.top, text_mask.bounds.right, text_mask.bounds.bottom)
+    )
+    return WordmarkSource(mask=cropped, bounds=PixelBounds(0, 0, cropped.width, cropped.height))
+
+
 def render_text_mask(
     text: str,
     font_path: str | Path,

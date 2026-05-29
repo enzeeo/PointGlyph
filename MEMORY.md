@@ -38,11 +38,16 @@
 - Rejected: A synthetic `--bold` flag, font-family/weight resolution, and manifest-only font weight metadata for this pass.
 
 ### 2026-05-28 - Delayed Reveal and Solid Texture Plane
-- Decided: Particle JSON includes seeded `appearProgresses`, with floor-half of particles visible immediately and the rest revealed during text formation.
-- Why: The hero animation should reanimate over time instead of showing every particle at once.
+- Decided: Particle JSON includes seeded `appearProgresses`, with floor-half of particles visible immediately and the rest revealed during text formation; manifest guidance then fades particles to zero opacity.
+- Why: The hero animation should reanimate over time, converge into the wordmark, and finish with only solid text visible.
 - Rejected: Adding a bundled frontend runtime or CLI flags for this default behavior.
 
 ### 2026-05-28 - Actual Solid Text Uses `solid_preview.png`
-- Decided: `solid_preview.png` is the recommended actual solid-text phase, rendered as a Three.js texture plane sized to the exported bounds.
+- Decided: `solid_preview.png` is the recommended actual solid-text phase, rendered as black text on a Three.js texture plane sized to the exported bounds.
 - Why: Dense particles can look solid but are still visibly particle-based; a texture generated from the same font mask gives a crisp wordmark.
 - Rejected: Treating `solid_particles.json` as the authoritative solid phase or adding GLB/mesh output in this pass.
+
+### 2026-05-29 - Canonical Cropped Wordmark Source
+- Decided: Particles and `solid_preview.png` are generated from the same cropped font alpha mask, and manifest alignment metadata records texture size, content box, zero inset, and world-to-texture mapping.
+- Why: A solid texture with different crop, padding, or aspect ratio cannot align perfectly with particle `textPositions`.
+- Rejected: Independent solid texture sizing, CSS text overlays, and adding SVG/outline parsing in this pass.

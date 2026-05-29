@@ -5,9 +5,9 @@ import pytest
 from PIL import Image
 
 from pointglyph.cli import main
-from pointglyph.geometry import Bounds
+from pointglyph.geometry import Bounds, normalize_points_for_threejs
 from pointglyph.preview import export_preview_png, export_solid_preview_png
-from pointglyph.text_mask import render_text_mask
+from pointglyph.text_mask import create_wordmark_source, render_text_mask
 
 
 def test_render_text_mask_has_content(font_path):
@@ -38,19 +38,40 @@ def test_export_preview_png_creates_image(tmp_path):
     assert image.size[1] > 0
 
 
-def test_export_solid_preview_png_matches_particle_preview_canvas(tmp_path, font_path):
+def test_export_solid_preview_png_creates_aligned_black_texture(tmp_path, font_path):
     text_mask = render_text_mask("TEST", font_path)
-    bounds = Bounds(width=10.0, height=2.0)
-    particle_output = tmp_path / "preview.png"
+    wordmark = create_wordmark_source(text_mask)
+    _points, bounds = normalize_points_for_threejs(
+        np.array([[0.0, 0.0], [wordmark.bounds.width, wordmark.bounds.height]]),
+        width_units=10.0,
+        source_bounds=wordmark.source_bounds,
+    )
     solid_output = tmp_path / "solid_preview.png"
 
-    export_preview_png(particle_output, np.array([[-5.0, -1.0, 0.0], [5.0, 1.0, 0.0]]), bounds)
-    export_solid_preview_png(solid_output, text_mask, bounds)
+    metadata = export_solid_preview_png(solid_output, wordmark.mask, bounds)
 
-    particle_image = Image.open(particle_output)
     solid_image = Image.open(solid_output)
-    assert solid_image.size == particle_image.size
+    expected_height = round(bounds.height * 1200 / bounds.width)
+    assert solid_image.size == (1200, expected_height)
     assert solid_image.getbbox() is not None
+    alpha_box = solid_image.getchannel("A").getbbox()
+    assert metadata["contentBox"] == {
+        "left": alpha_box[0],
+        "top": alpha_box[1],
+        "right": alpha_box[2],
+        "bottom": alpha_box[3],
+        "width": alpha_box[2] - alpha_box[0],
+        "height": alpha_box[3] - alpha_box[1],
+    }
+    assert metadata["solidTexture"] == {
+        "width": 1200,
+        "height": expected_height,
+        "padding": 0,
+        "inset": [0, 0, 0, 0],
+    }
+    visible_pixels = [pixel for pixel in solid_image.getdata() if pixel[3] > 0]
+    assert visible_pixels
+    assert all(pixel[:3] == (0, 0, 0) for pixel in visible_pixels)
 
 
 def test_cli_creates_required_files(tmp_path, font_path):
@@ -97,11 +118,44 @@ def test_cli_creates_required_files(tmp_path, font_path):
     assert manifest["variants"]["solid"]["particleCount"] == points * 4
     assert manifest["animation"]["solidText"]["texture"] == "solid_preview.png"
     assert manifest["animation"]["particleReveal"]["attribute"] == "appearProgresses"
+    assert manifest["animation"]["solidText"]["planeSize"] == [
+        manifest["bounds"]["width"],
+        manifest["bounds"]["height"],
+    ]
+    assert manifest["animation"]["solidText"]["planeCenter"] == [0.0, 0.0, 0.0]
     preview_image = Image.open(output_dir / "preview.png")
     solid_particle_image = Image.open(output_dir / "solid_particle_preview.png")
     solid_image = Image.open(output_dir / "solid_preview.png")
+    alpha_box = solid_image.getchannel("A").getbbox()
     assert solid_particle_image.size == preview_image.size
-    assert solid_image.size == preview_image.size
+    assert manifest["alignment"]["solidTexture"] == {
+        "width": solid_image.size[0],
+        "height": solid_image.size[1],
+        "padding": 0,
+        "inset": [0, 0, 0, 0],
+    }
+    assert manifest["alignment"]["contentBox"] == {
+        "left": alpha_box[0],
+        "top": alpha_box[1],
+        "right": alpha_box[2],
+        "bottom": alpha_box[3],
+        "width": alpha_box[2] - alpha_box[0],
+        "height": alpha_box[3] - alpha_box[1],
+    }
+    assert manifest["alignment"]["worldToTexture"] == {
+        "world": {
+            "left": -manifest["bounds"]["width"] / 2.0,
+            "right": manifest["bounds"]["width"] / 2.0,
+            "top": manifest["bounds"]["height"] / 2.0,
+            "bottom": -manifest["bounds"]["height"] / 2.0,
+        },
+        "texture": {
+            "left": 0,
+            "right": solid_image.size[0],
+            "top": 0,
+            "bottom": solid_image.size[1],
+        },
+    }
 
 
 def test_cli_accepts_bold_font_and_records_manifest_font(tmp_path, bold_font_path):

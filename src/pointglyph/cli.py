@@ -6,7 +6,7 @@ from pointglyph.exporters import export_manifest_json, export_particles_json
 from pointglyph.geometry import generate_appear_progresses, generate_cloud_positions, normalize_points_for_threejs
 from pointglyph.preview import export_preview_png, export_solid_preview_png
 from pointglyph.sampling import sample_text_points
-from pointglyph.text_mask import render_text_mask
+from pointglyph.text_mask import create_wordmark_source, render_text_mask
 
 
 def _parse_color(raw: str) -> tuple[float, float, float]:
@@ -65,14 +65,9 @@ def main(argv: list[str] | None = None) -> int:
 
     args.output.mkdir(parents=True, exist_ok=True)
     text_mask = render_text_mask(args.text, args.font)
-    source_bounds = (
-        text_mask.bounds.left,
-        text_mask.bounds.top,
-        text_mask.bounds.right,
-        text_mask.bounds.bottom,
-    )
-    image_points = sample_text_points(text_mask.mask, args.points, args.seed)
-    text_positions, bounds = normalize_points_for_threejs(image_points, args.width_units, source_bounds)
+    wordmark = create_wordmark_source(text_mask)
+    image_points = sample_text_points(wordmark.mask, args.points, args.seed)
+    text_positions, bounds = normalize_points_for_threejs(image_points, args.width_units, wordmark.source_bounds)
     start_positions = generate_cloud_positions(args.points, bounds, args.cloud_radius, args.z_jitter, args.seed)
     end_seed = None if args.seed is None else args.seed + 1
     end_positions = generate_cloud_positions(args.points, bounds, args.cloud_radius, args.z_jitter, end_seed)
@@ -83,11 +78,11 @@ def main(argv: list[str] | None = None) -> int:
     solid_start_seed = None if args.seed is None else args.seed + 4
     solid_end_seed = None if args.seed is None else args.seed + 5
     solid_appear_seed = None if args.seed is None else args.seed + 6
-    solid_image_points = sample_text_points(text_mask.mask, solid_particle_count, solid_sample_seed)
+    solid_image_points = sample_text_points(wordmark.mask, solid_particle_count, solid_sample_seed)
     solid_text_positions, solid_bounds = normalize_points_for_threejs(
         solid_image_points,
         args.width_units,
-        source_bounds,
+        wordmark.source_bounds,
     )
     solid_start_positions = generate_cloud_positions(
         solid_particle_count,
@@ -123,6 +118,24 @@ def main(argv: list[str] | None = None) -> int:
         end_positions=solid_end_positions,
         appear_progresses=solid_appear_progresses,
     )
+    solid_metadata = export_solid_preview_png(args.output / "solid_preview.png", wordmark.mask, bounds)
+    alignment = {
+        **solid_metadata,
+        "worldToTexture": {
+            "world": {
+                "left": -bounds.width / 2.0,
+                "right": bounds.width / 2.0,
+                "top": bounds.height / 2.0,
+                "bottom": -bounds.height / 2.0,
+            },
+            "texture": {
+                "left": 0,
+                "right": solid_metadata["solidTexture"]["width"],
+                "top": 0,
+                "bottom": solid_metadata["solidTexture"]["height"],
+            },
+        },
+    }
     export_manifest_json(
         args.output / "manifest.json",
         name=args.output.name,
@@ -132,10 +145,10 @@ def main(argv: list[str] | None = None) -> int:
         bounds=bounds,
         default_particle_size=0.035,
         default_color=args.color,
+        alignment=alignment,
     )
     export_preview_png(args.output / "preview.png", text_positions, bounds)
     export_preview_png(args.output / "solid_particle_preview.png", solid_text_positions, solid_bounds)
-    export_solid_preview_png(args.output / "solid_preview.png", text_mask, bounds)
     return 0
 
 

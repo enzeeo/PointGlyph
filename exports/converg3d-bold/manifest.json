@@ -15,6 +15,41 @@
     "height": 1.1924882629107982,
     "depth": 0.0
   },
+  "alignment": {
+    "contentBox": {
+      "left": 0,
+      "top": 0,
+      "right": 1200,
+      "bottom": 143,
+      "width": 1200,
+      "height": 143
+    },
+    "solidTexture": {
+      "width": 1200,
+      "height": 143,
+      "padding": 0,
+      "inset": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "worldToTexture": {
+      "world": {
+        "left": -5.0,
+        "right": 5.0,
+        "top": 0.5962441314553991,
+        "bottom": -0.5962441314553991
+      },
+      "texture": {
+        "left": 0,
+        "right": 1200,
+        "top": 0,
+        "bottom": 143
+      }
+    }
+  },
   "files": {
     "particles": "particles.json",
     "preview": "preview.png",
@@ -46,10 +81,31 @@
       ],
       "meaning": "Hide or fade each particle until global progress reaches its appearProgress."
     },
+    "particleFadeOut": {
+      "startProgress": 0.75,
+      "endProgress": 1.0,
+      "finalOpacity": 0.0,
+      "meaning": "Fade particles out after convergence so only the solid text remains."
+    },
     "solidText": {
       "texture": "solid_preview.png",
       "recommendedRenderMode": "TexturePlane",
-      "fadeInAfterParticleReveal": true
+      "color": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "planeSize": [
+        10.0,
+        1.1924882629107982
+      ],
+      "planeCenter": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fadeInAfterParticleReveal": true,
+      "finalOpacity": 1.0
     }
   },
   "recommendedThreeJs": {

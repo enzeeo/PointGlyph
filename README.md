@@ -96,6 +96,36 @@ runtime can reveal particles after the animation starts.
     "height": 2.4,
     "depth": 0.0
   },
+  "alignment": {
+    "contentBox": {
+      "left": 0,
+      "top": 0,
+      "right": 1200,
+      "bottom": 288,
+      "width": 1200,
+      "height": 288
+    },
+    "solidTexture": {
+      "width": 1200,
+      "height": 288,
+      "padding": 0,
+      "inset": [0, 0, 0, 0]
+    },
+    "worldToTexture": {
+      "world": {
+        "left": -5.0,
+        "right": 5.0,
+        "top": 1.2,
+        "bottom": -1.2
+      },
+      "texture": {
+        "left": 0,
+        "right": 1200,
+        "top": 0,
+        "bottom": 288
+      }
+    }
+  },
   "files": {
     "particles": "particles.json",
     "preview": "preview.png",
@@ -124,10 +154,20 @@ runtime can reveal particles after the animation starts.
       "delayedProgressRange": [0.08, 0.75],
       "meaning": "Hide or fade each particle until global progress reaches its appearProgress."
     },
+    "particleFadeOut": {
+      "startProgress": 0.75,
+      "endProgress": 1.0,
+      "finalOpacity": 0.0,
+      "meaning": "Fade particles out after convergence so only the solid text remains."
+    },
     "solidText": {
       "texture": "solid_preview.png",
       "recommendedRenderMode": "TexturePlane",
-      "fadeInAfterParticleReveal": true
+      "color": [0.0, 0.0, 0.0],
+      "planeSize": [10.0, 2.4],
+      "planeCenter": [0.0, 0.0, 0.0],
+      "fadeInAfterParticleReveal": true,
+      "finalOpacity": 1.0
     }
   },
   "recommendedThreeJs": {
@@ -144,8 +184,10 @@ V1 does not include a `textMesh` field or reference `text_mesh.glb` in the
 manifest.
 
 `preview.png` shows the sampled particle positions. `solid_preview.png` is a
-transparent text render using the same font mask and canvas size, so a frontend
-can fade it over the particle text for an actual solid-text phase.
+content-only transparent PNG with black text, generated from the same cropped
+font alpha mask as `textPositions`. Render it on a centered plane using
+`animation.solidText.planeSize`; do not add CSS text, padding, or independent
+scaling.
 `solid_particles.json` uses the same schema as `particles.json` with 4x the
 requested particle count for compatibility with particle-only renderers, but it
 is not the recommended solid text output.
@@ -183,15 +225,21 @@ const solidMaterial = new THREE.MeshBasicMaterial({
   opacity: 0
 });
 const solidText = new THREE.Mesh(
-  new THREE.PlaneGeometry(data.bounds.width, data.bounds.height),
+  new THREE.PlaneGeometry(
+    manifest.animation.solidText.planeSize[0],
+    manifest.animation.solidText.planeSize[1]
+  ),
   solidMaterial
 );
+solidText.position.set(...manifest.animation.solidText.planeCenter);
 ```
 
 Interpolate between `startPositions`, `textPositions`, and `endPositions` in a
 shader or animation loop with a single progress value. Gate each particle's
-alpha against its `appearProgress` attribute, then fade `solidText.material`
-from `0` to `1` once the particle wordmark has formed.
+alpha against its `appearProgress` attribute, converge particles to
+`textPositions`, then fade particle alpha to `0` while fading
+`solidText.material.opacity` to `1`. The final visible state should be only the
+black `solid_preview.png` texture plane.
 
 ## Future Work
 

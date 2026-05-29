@@ -47,6 +47,7 @@ def export_manifest_json(
     bounds: Bounds,
     default_particle_size: float,
     default_color: tuple[float, float, float],
+    alignment: dict[str, object],
 ) -> None:
     data = {
         "version": 1,
@@ -57,6 +58,7 @@ def export_manifest_json(
         "defaultParticleSize": default_particle_size,
         "defaultColor": [float(channel) for channel in default_color],
         "bounds": bounds.to_dict(),
+        "alignment": alignment,
         "files": {
             "particles": "particles.json",
             "preview": "preview.png",
@@ -85,10 +87,20 @@ def export_manifest_json(
                 "delayedProgressRange": [0.08, 0.75],
                 "meaning": "Hide or fade each particle until global progress reaches its appearProgress.",
             },
+            "particleFadeOut": {
+                "startProgress": 0.75,
+                "endProgress": 1.0,
+                "finalOpacity": 0.0,
+                "meaning": "Fade particles out after convergence so only the solid text remains.",
+            },
             "solidText": {
                 "texture": "solid_preview.png",
                 "recommendedRenderMode": "TexturePlane",
+                "color": [0.0, 0.0, 0.0],
+                "planeSize": [float(bounds.width), float(bounds.height)],
+                "planeCenter": [0.0, 0.0, 0.0],
                 "fadeInAfterParticleReveal": True,
+                "finalOpacity": 1.0,
             },
         },
         "recommendedThreeJs": {
