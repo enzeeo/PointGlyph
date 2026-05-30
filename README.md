@@ -11,6 +11,8 @@ It generates:
 - `solid_preview.png`
 - `solid_particles.json`
 - `solid_particle_preview.png`
+- `lingering_particles.json`
+- `lingering_particle_preview.png`
 
 PointGlyph does not build a website, viewer, or scroll animation runtime.
 
@@ -131,7 +133,9 @@ runtime can reveal particles after the animation starts.
     "preview": "preview.png",
     "solidPreview": "solid_preview.png",
     "solidParticles": "solid_particles.json",
-    "solidParticlePreview": "solid_particle_preview.png"
+    "solidParticlePreview": "solid_particle_preview.png",
+    "lingeringParticles": "lingering_particles.json",
+    "lingeringParticlePreview": "lingering_particle_preview.png"
   },
   "variants": {
     "default": {
@@ -145,6 +149,14 @@ runtime can reveal particles after the animation starts.
       "solidPreview": "solid_preview.png",
       "particleCount": 24000,
       "recommendedForActualSolidText": false
+    },
+    "lingering": {
+      "particles": "lingering_particles.json",
+      "preview": "lingering_particle_preview.png",
+      "solidPreview": "solid_preview.png",
+      "particleCount": 6000,
+      "residualParticleFraction": 0.12,
+      "recommendedForActualSolidText": true
     }
   },
   "animation": {
@@ -168,6 +180,14 @@ runtime can reveal particles after the animation starts.
       "planeCenter": [0.0, 0.0, 0.0],
       "fadeInAfterParticleReveal": true,
       "finalOpacity": 1.0
+    },
+    "lingeringParticles": {
+      "particles": "lingering_particles.json",
+      "preview": "lingering_particle_preview.png",
+      "solidTexture": "solid_preview.png",
+      "residualParticleFraction": 0.12,
+      "renderOverSolidText": true,
+      "meaning": "Render the solid text texture at full opacity with these particles above it."
     }
   },
   "recommendedThreeJs": {
@@ -191,6 +211,10 @@ scaling.
 `solid_particles.json` uses the same schema as `particles.json` with 4x the
 requested particle count for compatibility with particle-only renderers, but it
 is not the recommended solid text output.
+`lingering_particles.json` uses the same schema as `particles.json`, keeps most
+particles on the glyph, and leaves 12% offset as a loose halo. Render it above
+the fully opaque `solid_preview.png` texture for a solid wordmark with stray
+particles around it.
 
 ## Three.js Loading Sketch
 

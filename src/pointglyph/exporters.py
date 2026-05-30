@@ -48,6 +48,7 @@ def export_manifest_json(
     default_particle_size: float,
     default_color: tuple[float, float, float],
     alignment: dict[str, object],
+    lingering_particle_fraction: float = 0.12,
 ) -> None:
     data = {
         "version": 1,
@@ -65,6 +66,8 @@ def export_manifest_json(
             "solidPreview": "solid_preview.png",
             "solidParticles": "solid_particles.json",
             "solidParticlePreview": "solid_particle_preview.png",
+            "lingeringParticles": "lingering_particles.json",
+            "lingeringParticlePreview": "lingering_particle_preview.png",
         },
         "variants": {
             "default": {
@@ -78,6 +81,14 @@ def export_manifest_json(
                 "solidPreview": "solid_preview.png",
                 "particleCount": particle_count * 4,
                 "recommendedForActualSolidText": False,
+            },
+            "lingering": {
+                "particles": "lingering_particles.json",
+                "preview": "lingering_particle_preview.png",
+                "solidPreview": "solid_preview.png",
+                "particleCount": particle_count,
+                "residualParticleFraction": lingering_particle_fraction,
+                "recommendedForActualSolidText": True,
             },
         },
         "animation": {
@@ -101,6 +112,14 @@ def export_manifest_json(
                 "planeCenter": [0.0, 0.0, 0.0],
                 "fadeInAfterParticleReveal": True,
                 "finalOpacity": 1.0,
+            },
+            "lingeringParticles": {
+                "particles": "lingering_particles.json",
+                "preview": "lingering_particle_preview.png",
+                "solidTexture": "solid_preview.png",
+                "residualParticleFraction": lingering_particle_fraction,
+                "renderOverSolidText": True,
+                "meaning": "Render the solid text texture at full opacity with these particles above it.",
             },
         },
         "recommendedThreeJs": {

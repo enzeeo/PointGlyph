@@ -3,10 +3,17 @@ import sys
 from pathlib import Path
 
 from pointglyph.exporters import export_manifest_json, export_particles_json
-from pointglyph.geometry import generate_appear_progresses, generate_cloud_positions, normalize_points_for_threejs
+from pointglyph.geometry import (
+    generate_appear_progresses,
+    generate_cloud_positions,
+    generate_lingering_text_positions,
+    normalize_points_for_threejs,
+)
 from pointglyph.preview import export_preview_png, export_solid_preview_png
 from pointglyph.sampling import sample_text_points
 from pointglyph.text_mask import create_wordmark_source, render_text_mask
+
+LINGERING_PARTICLE_FRACTION = 0.12
 
 
 def _parse_color(raw: str) -> tuple[float, float, float]:
@@ -73,6 +80,13 @@ def main(argv: list[str] | None = None) -> int:
     end_positions = generate_cloud_positions(args.points, bounds, args.cloud_radius, args.z_jitter, end_seed)
     appear_seed = None if args.seed is None else args.seed + 2
     appear_progresses = generate_appear_progresses(args.points, appear_seed)
+    lingering_seed = None if args.seed is None else args.seed + 7
+    lingering_text_positions = generate_lingering_text_positions(
+        text_positions,
+        bounds,
+        residual_fraction=LINGERING_PARTICLE_FRACTION,
+        seed=lingering_seed,
+    )
     solid_particle_count = args.points * 4
     solid_sample_seed = None if args.seed is None else args.seed + 3
     solid_start_seed = None if args.seed is None else args.seed + 4
@@ -106,6 +120,15 @@ def main(argv: list[str] | None = None) -> int:
         bounds=bounds,
         start_positions=start_positions,
         text_positions=text_positions,
+        end_positions=end_positions,
+        appear_progresses=appear_progresses,
+    )
+    export_particles_json(
+        args.output / "lingering_particles.json",
+        text=args.text,
+        bounds=bounds,
+        start_positions=start_positions,
+        text_positions=lingering_text_positions,
         end_positions=end_positions,
         appear_progresses=appear_progresses,
     )
@@ -146,8 +169,10 @@ def main(argv: list[str] | None = None) -> int:
         default_particle_size=0.035,
         default_color=args.color,
         alignment=alignment,
+        lingering_particle_fraction=LINGERING_PARTICLE_FRACTION,
     )
     export_preview_png(args.output / "preview.png", text_positions, bounds)
+    export_preview_png(args.output / "lingering_particle_preview.png", lingering_text_positions, bounds)
     export_preview_png(args.output / "solid_particle_preview.png", solid_text_positions, solid_bounds)
     return 0
 

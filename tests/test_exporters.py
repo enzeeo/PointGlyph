@@ -89,6 +89,8 @@ def test_export_manifest_json_omits_glb_and_includes_defaults(tmp_path):
         "solidPreview": "solid_preview.png",
         "solidParticles": "solid_particles.json",
         "solidParticlePreview": "solid_particle_preview.png",
+        "lingeringParticles": "lingering_particles.json",
+        "lingeringParticlePreview": "lingering_particle_preview.png",
     }
     assert data["variants"] == {
         "default": {
@@ -103,6 +105,14 @@ def test_export_manifest_json_omits_glb_and_includes_defaults(tmp_path):
             "particleCount": 8,
             "recommendedForActualSolidText": False,
         },
+        "lingering": {
+            "particles": "lingering_particles.json",
+            "preview": "lingering_particle_preview.png",
+            "solidPreview": "solid_preview.png",
+            "particleCount": 2,
+            "residualParticleFraction": 0.12,
+            "recommendedForActualSolidText": True,
+        },
     }
     assert data["animation"]["particleReveal"]["attribute"] == "appearProgresses"
     assert data["animation"]["particleReveal"]["initialVisibleFraction"] == 0.5
@@ -115,6 +125,10 @@ def test_export_manifest_json_omits_glb_and_includes_defaults(tmp_path):
     assert data["animation"]["solidText"]["finalOpacity"] == 1.0
     assert data["animation"]["solidText"]["planeSize"] == [10.0, 2.0]
     assert data["animation"]["solidText"]["planeCenter"] == [0.0, 0.0, 0.0]
+    assert data["animation"]["lingeringParticles"]["particles"] == "lingering_particles.json"
+    assert data["animation"]["lingeringParticles"]["solidTexture"] == "solid_preview.png"
+    assert data["animation"]["lingeringParticles"]["residualParticleFraction"] == 0.12
+    assert data["animation"]["lingeringParticles"]["renderOverSolidText"] is True
     assert data["recommendedThreeJs"]["solidRenderMode"] == "TexturePlane"
     assert "text_mesh.glb" not in raw
     assert "recommendedThreeJs" in data

@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+from pointglyph import geometry
 from pointglyph.geometry import (
     Bounds,
     generate_appear_progresses,
@@ -91,6 +92,19 @@ def test_generate_appear_progresses_delays_more_than_half():
     assert np.count_nonzero(progresses > 0.0) == 5
     assert progresses.max() <= 0.75
     assert progresses[progresses > 0.0].min() >= 0.08
+
+
+def test_generate_lingering_text_positions_moves_seeded_fraction():
+    bounds = Bounds(width=10.0, height=2.0, depth=0.0)
+    text_positions = np.column_stack((np.linspace(-5.0, 5.0, 25), np.zeros(25), np.zeros(25)))
+
+    first = geometry.generate_lingering_text_positions(text_positions, bounds, residual_fraction=0.12, seed=7)
+    second = geometry.generate_lingering_text_positions(text_positions, bounds, residual_fraction=0.12, seed=7)
+
+    np.testing.assert_array_equal(first, second)
+    moved = np.any(first != text_positions, axis=1)
+    assert np.count_nonzero(moved) == 3
+    np.testing.assert_array_equal(first[~moved], text_positions[~moved])
 
 
 def test_normalize_points_rejects_invalid_width():

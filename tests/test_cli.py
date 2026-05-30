@@ -99,8 +99,11 @@ def test_cli_creates_required_files(tmp_path, font_path):
     assert (output_dir / "solid_preview.png").exists()
     assert (output_dir / "solid_particles.json").exists()
     assert (output_dir / "solid_particle_preview.png").exists()
+    assert (output_dir / "lingering_particles.json").exists()
+    assert (output_dir / "lingering_particle_preview.png").exists()
     particles = json.loads((output_dir / "particles.json").read_text())
     solid_particles = json.loads((output_dir / "solid_particles.json").read_text())
+    lingering_particles = json.loads((output_dir / "lingering_particles.json").read_text())
     manifest = json.loads((output_dir / "manifest.json").read_text())
     assert len(particles["attributes"]["startPositions"]) == points * 3
     assert len(particles["attributes"]["textPositions"]) == points * 3
@@ -112,11 +115,24 @@ def test_cli_creates_required_files(tmp_path, font_path):
     assert len(solid_particles["attributes"]["textPositions"]) == points * 4 * 3
     assert len(solid_particles["attributes"]["endPositions"]) == points * 4 * 3
     assert len(solid_particles["attributes"]["appearProgresses"]) == points * 4
+    assert lingering_particles["particleCount"] == points
+    assert lingering_particles["attributes"]["startPositions"] == particles["attributes"]["startPositions"]
+    assert lingering_particles["attributes"]["endPositions"] == particles["attributes"]["endPositions"]
+    assert lingering_particles["attributes"]["appearProgresses"] == particles["attributes"]["appearProgresses"]
+    lingering_text = np.array(lingering_particles["attributes"]["textPositions"]).reshape(-1, 3)
+    default_text = np.array(particles["attributes"]["textPositions"]).reshape(-1, 3)
+    assert np.count_nonzero(np.any(lingering_text != default_text, axis=1)) == 3
     assert manifest["files"]["solidPreview"] == "solid_preview.png"
     assert manifest["files"]["solidParticles"] == "solid_particles.json"
     assert manifest["files"]["solidParticlePreview"] == "solid_particle_preview.png"
+    assert manifest["files"]["lingeringParticles"] == "lingering_particles.json"
+    assert manifest["files"]["lingeringParticlePreview"] == "lingering_particle_preview.png"
     assert manifest["variants"]["solid"]["particleCount"] == points * 4
+    assert manifest["variants"]["lingering"]["particleCount"] == points
+    assert manifest["variants"]["lingering"]["residualParticleFraction"] == 0.12
     assert manifest["animation"]["solidText"]["texture"] == "solid_preview.png"
+    assert manifest["animation"]["lingeringParticles"]["solidTexture"] == "solid_preview.png"
+    assert manifest["animation"]["lingeringParticles"]["renderOverSolidText"] is True
     assert manifest["animation"]["particleReveal"]["attribute"] == "appearProgresses"
     assert manifest["animation"]["solidText"]["planeSize"] == [
         manifest["bounds"]["width"],
@@ -125,9 +141,11 @@ def test_cli_creates_required_files(tmp_path, font_path):
     assert manifest["animation"]["solidText"]["planeCenter"] == [0.0, 0.0, 0.0]
     preview_image = Image.open(output_dir / "preview.png")
     solid_particle_image = Image.open(output_dir / "solid_particle_preview.png")
+    lingering_particle_image = Image.open(output_dir / "lingering_particle_preview.png")
     solid_image = Image.open(output_dir / "solid_preview.png")
     alpha_box = solid_image.getchannel("A").getbbox()
     assert solid_particle_image.size == preview_image.size
+    assert lingering_particle_image.size == preview_image.size
     assert manifest["alignment"]["solidTexture"] == {
         "width": solid_image.size[0],
         "height": solid_image.size[1],

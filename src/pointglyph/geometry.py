@@ -90,3 +90,38 @@ def generate_appear_progresses(
     progresses[immediate_count:] = delayed
     rng.shuffle(progresses)
     return progresses
+
+
+def generate_lingering_text_positions(
+    text_positions: np.ndarray,
+    bounds: Bounds,
+    *,
+    residual_fraction: float,
+    seed: int | None,
+) -> np.ndarray:
+    positions = np.asarray(text_positions, dtype=float)
+    if positions.ndim != 2 or positions.shape[1] != 3:
+        raise ValueError("text_positions must use x,y,z rows")
+    if not 0.0 <= residual_fraction <= 1.0:
+        raise ValueError("residual_fraction must be between 0 and 1")
+
+    particle_count = len(positions)
+    lingering_count = int(round(particle_count * residual_fraction))
+    lingering_positions = positions.copy()
+    if lingering_count == 0:
+        return lingering_positions
+
+    rng = np.random.default_rng(seed)
+    lingering_indices = rng.choice(particle_count, size=lingering_count, replace=False)
+    x_spread = bounds.width * 0.035
+    y_spread = max(bounds.height * 0.14, bounds.width * 0.02)
+    z_spread = max(bounds.depth, 0.02)
+    offsets = np.column_stack(
+        (
+            rng.normal(0.0, x_spread, lingering_count),
+            rng.normal(0.0, y_spread, lingering_count),
+            rng.uniform(-z_spread, z_spread, lingering_count),
+        )
+    )
+    lingering_positions[lingering_indices] += offsets
+    return lingering_positions.astype(float)

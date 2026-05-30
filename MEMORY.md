@@ -51,3 +51,8 @@
 - Decided: Particles and `solid_preview.png` are generated from the same cropped font alpha mask, and manifest alignment metadata records texture size, content box, zero inset, and world-to-texture mapping.
 - Why: A solid texture with different crop, padding, or aspect ratio cannot align perfectly with particle `textPositions`.
 - Rejected: Independent solid texture sizing, CSS text overlays, and adding SVG/outline parsing in this pass.
+
+### 2026-05-30 - Lingering Particle Variant
+- Decided: Exports include `lingering_particles.json` and `lingering_particle_preview.png` as an extra variant, while the actual solid word remains `solid_preview.png`.
+- Why: Some hero states need a solid readable wordmark with a subtle unconnected particle halo so not every particle appears to have converged.
+- Rejected: Replacing the default fadeout behavior, adding a CLI flag, or hardcoding a blue particle color.
